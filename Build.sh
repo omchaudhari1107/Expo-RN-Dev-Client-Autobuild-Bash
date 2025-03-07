@@ -2,29 +2,32 @@
 
 echo "Enter your Expo app name: "
 read APP_NAME
-echo "----->Project Createion at Desktop<-----"
-CURRENT_USER=$(whoami)
-PROJECT_PATH="/home/$CURRENT_USER/Desktop/$APP_NAME"
-sudo npx create-expo-app "$PROJECT_PATH" -t
 
-cd "$APP_NAME"
+CURRENT_USER=$(whoami)
+PROJECT_PATH="./$APP_NAME"
+
+npx create-expo-app "$PROJECT_PATH" -t || { echo "❌ Failed to create Expo app."; exit 1; }
+
+sudo chown -R "$CURRENT_USER:$CURRENT_USER" "$PROJECT_PATH"
+echo "✅ Ownership updated to $CURRENT_USER."
+
+cd "$PROJECT_PATH" || { echo "❌ Failed to navigate to project directory."; exit 1; }
 
 sudo npm install -g eas-cli
 sudo npx expo install expo-dev-client
-sudo npx expo prebuild
+sudo npx expo prebuild || { echo "❌ Expo prebuild failed."; exit 1; }
 
-read -p "Do you want to build and run the project? (Y/N): " RESPONSE
-if [[ "$RESPONSE" == "Y" || "$RESPONSE" == "y" ]]; then
-    sudo eas login
-    sudo eas build --profile development --platform android
-    echo "✅ Applicatio Builded.."
+read -p "Do you want to build the project? (Y/N): " RESPONSE
+if [[ "$RESPONSE" =~ ^[Yy]$ ]]; then
+    
+    sudo eas build --profile development --platform android || { echo "❌ Build failed."; exit 1; }
+    echo "✅ Application built successfully!"
 else
-    echo "Skipping build and run process."
+    echo "Skipping build process."
 fi
-sudo chown -R "$CURRENT_USER:$CURRENT_USER" "/home/$CURRENT_USER/Desktop/$APP_NAME"
 
-echo "✅ Ownership updated to $CURRENT_USER."
 
-echo "🚀 All set! Your Expo app is ready to roll. To launch it, simply run:"
-echo "✨ npx expo start --dev-client ✨"
-echo "Enjoy coding and happy building! 🚀🎉"
+echo -e "\n🚀 All set! Your Expo app is ready to go."
+echo -e "✨ To launch your app, run:\n"
+echo -e "            npx expo start --dev-client\n"
+echo -e "Happy coding! 🚀🎉"
