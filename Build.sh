@@ -2,10 +2,10 @@
 
 echo "Enter your Expo app name: "
 read APP_NAME
-
+echo "----->Project Createion at Desktop<-----"
 CURRENT_USER=$(whoami)
-
-sudo npx create-expo-app "$APP_NAME" -t
+PROJECT_PATH="/home/$CURRENT_USER/Desktop/$APP_NAME"
+sudo npx create-expo-app "$PROJECT_PATH" -t
 
 cd "$APP_NAME"
 
