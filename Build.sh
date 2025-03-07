@@ -7,7 +7,7 @@ CURRENT_USER=$(whoami)
 PROJECT_PATH="./$APP_NAME"
 
 npx create-expo-app "$PROJECT_PATH" -t || { echo "❌ Failed to create Expo app."; exit 1; }
-
+echo "file stored at `~/Expo-RN-Dev-Client-Autobuild-Bash/$APP_NAME`"
 sudo chown -R "$CURRENT_USER:$CURRENT_USER" "$PROJECT_PATH"
 echo "✅ Ownership updated to $CURRENT_USER."
 
