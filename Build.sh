@@ -1,33 +1,40 @@
 #!/bin/bash
 
-echo "Enter your Expo app name: "
-read APP_NAME
+# Ask for the app name
+read -p "Enter your Expo app name: " app_name
 
-CURRENT_USER=$(whoami)
-PROJECT_PATH="./$APP_NAME"
-
-npx create-expo-app "$PROJECT_PATH" -t || { echo "❌ Failed to create Expo app."; exit 1; }
-echo "file stored at `~/Expo-RN-Dev-Client-Autobuild-Bash/$APP_NAME`"
-sudo chown -R "$CURRENT_USER:$CURRENT_USER" "$PROJECT_PATH"
-echo "✅ Ownership updated to $CURRENT_USER."
-
-cd "$PROJECT_PATH" || { echo "❌ Failed to navigate to project directory."; exit 1; }
-
-sudo npm install -g eas-cli
-sudo npx expo install expo-dev-client
-sudo npx expo prebuild || { echo "❌ Expo prebuild failed."; exit 1; }
-
-read -p "Do you want to build the project? (Y/N): " RESPONSE
-if [[ "$RESPONSE" =~ ^[Yy]$ ]]; then
-    
-    sudo eas build --profile development --platform android || { echo "❌ Build failed."; exit 1; }
-    echo "✅ Application built successfully!"
-else
-    echo "Skipping build process."
+# Check for empty input
+if [ -z "$app_name" ]; then
+  echo "App name cannot be empty."
+  exit 1
 fi
 
+# Step 1: Create Expo app with template option
+echo "Creating Expo app '$app_name'..."
+npx create-expo-app "$app_name" -t
 
-echo -e "\n🚀 All set! Your Expo app is ready to go."
-echo -e "✨ To launch your app, run:\n"
-echo -e "            npx expo start --dev-client\n"
-echo -e "Happy coding! 🚀🎉"
+cd "$app_name" || { echo "Failed to change directory to $app_name"; exit 1; }
+
+# Step 2: Install EAS CLI globally
+echo "Installing EAS CLI..."
+npm install -g eas-cli
+
+# Step 3: Install expo-dev-client
+echo "Installing expo-dev-client..."
+npx expo install expo-dev-client
+
+# Step 4: Prebuild the app
+echo "Running expo prebuild..."
+npx expo prebuild
+
+# Step 5: Ask to build and run
+read -p "Do you want to build the dev client and start Expo? (y/n): " build_choice
+
+if [[ "$build_choice" == "y" || "$build_choice" == "Y" ]]; then
+  echo "Building dev client..."
+  eas build --profile development --platform android
+  echo "Starting Expo with dev client..."
+  npx expo start --dev-client
+else
+  echo "Skipping build and start."
+fi
